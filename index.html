@@ -25,24 +25,45 @@
             max-width: 1200px;
             margin: 0 auto;
         }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid var(--flare-orange);
+            padding-bottom: 20px;
+        }
+
+        .main-league-logo {
+            max-width: 200px; /* Reduced for layout balance */
+            height: auto;
+            margin-bottom: 15px;
+        }
         
         h1 {
             color: var(--industrial-gold);
-            text-align: center;
             text-transform: uppercase;
             letter-spacing: 3px;
-            border-bottom: 2px solid var(--flare-orange);
-            padding-bottom: 15px;
-            margin-bottom: 40px;
+            margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .division-header {
+            display: flex;
+            align-items: center;
+            margin-top: 40px;
+            margin-bottom: 15px;
+        }
+
+        .division-logo {
+            width: 75px; /* Adjust size as needed */
+            height: auto;
+            margin-right: 15px;
         }
         
         h2 {
             color: var(--flare-orange);
             text-transform: uppercase;
-            margin-top: 40px;
-            border-left: 5px solid var(--industrial-gold);
-            padding-left: 10px;
+            margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
@@ -100,22 +121,57 @@
 </head>
 <body>
     <div class="dashboard-container">
-        <h1>Unnecessary Roughnecks League</h1>
         
-        <h2>Permian Division Standings</h2>
+        <div class="header-section">
+            <!-- LEAGUE LOGO PLACEHOLDER -->
+            <!-- Upload your league logo file (e.g., UFL-main-logo.png) to your repo -->
+            <!-- And change src='' to reference the filename, like src='UFL-main-logo.png' -->
+            <img id="league-logo-img" class="main-league-logo" src="" alt="">
+            <h1>Unnecessary Roughnecks League</h1>
+        </div>
+        
+        <div class="division-header">
+            <!-- PERMIAN DIVISION LOGO PLACEHOLDER -->
+            <!-- Same process: Change src='' below to reference your logo file, e.g., src='permian-logo.png' -->
+            <img id="permian-logo-img" class="division-logo" src="" alt="">
+            <h2>Permian Division Standings</h2>
+        </div>
         <div class="table-wrapper">
             <div id="permian-container" class="loading">Establishing connection to the Permian Basin...</div>
         </div>
         
-        <h2>Powder River Division Standings</h2>
+        <div class="division-header">
+            <!-- POWDER RIVER DIVISION LOGO PLACEHOLDER -->
+            <!-- Same process: Change src='' below to reference your logo file, e.g., src='powder-river-logo.png' -->
+            <img id="powder-logo-img" class="division-logo" src="" alt="">
+            <h2>Powder River Division Standings</h2>
+        </div>
         <div class="table-wrapper">
             <div id="powder-container" class="loading">Establishing connection to the Powder River Rig...</div>
         </div>
     </div>
 
     <script>
-        // The published CSV link provided by Google Sheets
+        // --- 1. SET YOUR LOGO LINKS HERE ---
+        // Option A (Recommended): Generate logos, upload to GitHub, and change to filenames:
+        // Example: const leagueLogoLink = 'UFL-main-logo.png';
+        
+        // Option B: Paste external URLs (e.g., from Imgur) inside the single quotes:
+        // Example: const leagueLogoLink = 'https://i.imgur.com/your-image-id.png';
+        
+        const leagueLogoLink = ''; // REPLACE THIS
+        const permianLogoLink = ''; // REPLACE THIS
+        const powderLogoLink = ''; // REPLACE THIS
+        
+        // --- 2. END OF LOGO CONFIGURATION (Do not edit below this line) ---
+
+        // Google published CSV
         const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSKp2B5o_bAqMuea_pBesEUoNxrk9BmlHlyGCQUkxj0Y5nPWXmqVEw0vuyQ4tH1w8z-7aCKbMGSiUW6/pub?gid=669905413&single=true&output=csv";
+
+        // Inject logo links into placeholders
+        if(leagueLogoLink) document.getElementById('league-logo-img').src = leagueLogoLink;
+        if(permianLogoLink) document.getElementById('permian-logo-img').src = permianLogoLink;
+        if(powderLogoLink) document.getElementById('powder-logo-img').src = powderLogoLink;
 
         async function fetchAndRenderData() {
             try {
@@ -127,9 +183,8 @@
                     return row.split(',').map(cell => cell.replace(/(^"|"$)/g, '').trim());
                 });
                 
-                // Matches the Python exact starting rows: 
-                // Permian starts at Row 3 (Index 2), length 8
-                // Powder starts at Row 14 (Index 13), length 8
+                // Starts at Row 3 (Index 2), length 8
+                // Starts at Row 14 (Index 13), length 8
                 const permianData = rows.slice(2, 10);
                 const powderData = rows.slice(13, 21);
 
@@ -141,11 +196,8 @@
                     html += '</tr></thead><tbody>';
                     
                     data.forEach(row => {
-                        // Skip any blank rows just in case
                         if(row.length === 0 || !row[0]) return;
-                        
                         html += '<tr>';
-                        // Loop through team name + 13 weeks of scores
                         for(let i = 0; i <= 13; i++) {
                             const val = row[i] ? row[i] : '-';
                             html += `<td>${val}</td>`;
