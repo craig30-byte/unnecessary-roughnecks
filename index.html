@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unnecessary Roughnecks League</title>
+    <style>
+        :root {
+            --oil-black: #121212;
+            --shale-grey: #2b2b2b;
+            --flare-orange: #ff5722;
+            --industrial-gold: #ffc107;
+            --text-light: #e0e0e0;
+        }
+        
+        body {
+            background-color: var(--oil-black);
+            color: var(--text-light);
+            font-family: 'Courier New', Courier, monospace; 
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: var(--industrial-gold);
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            border-bottom: 2px solid var(--flare-orange);
+            padding-bottom: 15px;
+            margin-bottom: 40px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        h2 {
+            color: var(--flare-orange);
+            text-transform: uppercase;
+            margin-top: 40px;
+            border-left: 5px solid var(--industrial-gold);
+            padding-left: 10px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .table-wrapper {
+            overflow-x: auto;
+            background-color: var(--shale-grey);
+            border-radius: 5px;
+            padding: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #444;
+        }
+        
+        th {
+            background-color: #1a1a1a;
+            color: var(--industrial-gold);
+            font-weight: bold;
+        }
+        
+        td:first-child {
+            text-align: left;
+            font-weight: bold;
+            color: white;
+            white-space: nowrap;
+        }
+        
+        tr:hover {
+            background-color: #333;
+        }
+        
+        .loading {
+            text-align: center;
+            color: var(--industrial-gold);
+            font-style: italic;
+            padding: 20px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <h1>Unnecessary Roughnecks League</h1>
+        
+        <h2>Permian Division Standings</h2>
+        <div class="table-wrapper">
+            <div id="permian-container" class="loading">Establishing connection to the Permian Basin...</div>
+        </div>
+        
+        <h2>Powder River Division Standings</h2>
+        <div class="table-wrapper">
+            <div id="powder-container" class="loading">Establishing connection to the Powder River Rig...</div>
+        </div>
+    </div>
+
+    <script>
+        // The published CSV link provided by Google Sheets
+        const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSKp2B5o_bAqMuea_pBesEUoNxrk9BmlHlyGCQUkxj0Y5nPWXmqVEw0vuyQ4tH1w8z-7aCKbMGSiUW6/pub?gid=669905413&single=true&output=csv";
+
+        async function fetchAndRenderData() {
+            try {
+                const response = await fetch(sheetUrl);
+                const csvText = await response.text();
+                
+                // Parse CSV by rows
+                const rows = csvText.split(/\r?\n/).map(row => {
+                    return row.split(',').map(cell => cell.replace(/(^"|"$)/g, '').trim());
+                });
+                
+                // Matches the Python exact starting rows: 
+                // Permian starts at Row 3 (Index 2), length 8
+                // Powder starts at Row 14 (Index 13), length 8
+                const permianData = rows.slice(2, 10);
+                const powderData = rows.slice(13, 21);
+
+                function buildTable(data) {
+                    let html = '<table><thead><tr><th>Team Name</th>';
+                    for(let i = 1; i <= 13; i++) {
+                        html += `<th>Wk ${i}</th>`;
+                    }
+                    html += '</tr></thead><tbody>';
+                    
+                    data.forEach(row => {
+                        // Skip any blank rows just in case
+                        if(row.length === 0 || !row[0]) return;
+                        
+                        html += '<tr>';
+                        // Loop through team name + 13 weeks of scores
+                        for(let i = 0; i <= 13; i++) {
+                            const val = row[i] ? row[i] : '-';
+                            html += `<td>${val}</td>`;
+                        }
+                        html += '</tr>';
+                    });
+                    
+                    html += '</tbody></table>';
+                    return html;
+                }
+
+                document.getElementById('permian-container').innerHTML = buildTable(permianData);
+                document.getElementById('powder-container').innerHTML = buildTable(powderData);
+                
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                document.getElementById('permian-container').innerHTML = "Error loading connection. Check wellhead sensors.";
+                document.getElementById('powder-container').innerHTML = "Error loading connection. Check wellhead sensors.";
+            }
+        }
+
+        fetchAndRenderData();
+    </script>
+</body>
+</html>
